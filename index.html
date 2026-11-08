@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mando PS5">
+<meta name="theme-color" content="#050d24">
+<title>Mando PS5</title>
+<style>
+:root{
+  --bg:#050d24; --panel:#0c1a40; --line:#1d3270; --ink:#e8f0ff; --dim:#8fa3d6;
+  --blue:#0070d1; --tri:#6dc8a4; --cir:#ee6a7c; --cro:#6a9fe0; --sq:#d99ac5;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--ink);
+  font:16px/1.4 ui-rounded,"SF Pro Rounded",system-ui,-apple-system,sans-serif;
+  padding:env(safe-area-inset-top,0) 20px env(safe-area-inset-bottom,0);
+  display:flex;justify-content:center;
+}
+main{width:100%;max-width:420px;padding:28px 0 40px;display:flex;flex-direction:column;gap:28px}
+h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+.state{display:flex;align-items:center;justify-content:space-between}
+.state p{color:var(--dim);font-size:.95rem}
+.symbols{display:flex;gap:10px;font-size:1.3rem;font-weight:700}
+.symbols span{color:var(--line);transition:color .4s}
+body.awake .symbols span:nth-child(1){color:var(--tri);transition-delay:.0s}
+body.awake .symbols span:nth-child(2){color:var(--cir);transition-delay:.25s}
+body.awake .symbols span:nth-child(3){color:var(--cro);transition-delay:.5s}
+body.awake .symbols span:nth-child(4){color:var(--sq);transition-delay:.75s}
+
+.power-wrap{display:grid;place-items:center;height:260px;position:relative}
+.power{
+  width:190px;height:190px;border-radius:50%;border:3px solid var(--line);
+  background:var(--panel);color:var(--dim);cursor:pointer;display:grid;place-items:center;
+  transition:border-color .3s,color .3s,transform .15s,box-shadow .4s;position:relative;z-index:1;
+}
+.power:active{transform:scale(.95)}
+.power svg{width:78px;height:78px}
+body.awake .power{border-color:var(--tri);color:var(--tri);box-shadow:0 0 0 8px rgba(109,200,164,.12)}
+body.standby .power{border-color:var(--blue);color:var(--ink)}
+body.offline .power{border-color:var(--cir);color:var(--cir)}
+.ring{position:absolute;width:190px;height:190px;border-radius:50%;border:2px solid var(--blue);opacity:0}
+body.busy .ring{animation:ping 1.6s ease-out infinite}
+body.busy .ring:nth-child(2){animation-delay:.8s}
+@keyframes ping{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.55);opacity:0}}
+
+.row{display:flex;gap:12px}
+button.sec{
+  flex:1;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--panel);
+  color:var(--ink);font:inherit;font-weight:600;cursor:pointer
+}
+button.sec:active{background:var(--line)}
+
+section{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}
+section h2{font-size:1rem;font-weight:700;margin-bottom:10px}
+.time{font-size:2.2rem;font-weight:700;letter-spacing:-.02em}
+.hint{color:var(--dim);font-size:.9rem}
+.chips{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.chip{padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.chip.on{background:var(--blue);border-color:var(--blue)}
+
+.add{display:flex;gap:8px;margin-bottom:10px}
+.add input{flex:1;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;min-width:0}
+.add button{padding:0 16px;border-radius:12px;border:0;background:var(--blue);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+ul{list-style:none;padding:0}
+li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+li label{flex:1;display:flex;align-items:center;gap:10px;cursor:pointer}
+li.done span{text-decoration:line-through;color:var(--dim)}
+li input{accent-color:var(--tri);width:18px;height:18px}
+li button{background:none;border:0;color:var(--dim);font-size:1.2rem;cursor:pointer;padding:4px 8px}
+#msg{min-height:1.2em;color:var(--cir);font-size:.9rem;text-align:center}
+:focus-visible{outline:2px solid var(--cro);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="unknown">
+<main>
+  <div class="state">
+    <div>
+      <h1>Mando PS5</h1>
+      <p id="label">Buscando tu consola…</p>
+    </div>
+    <div class="symbols" aria-hidden="true"><span>△</span><span>○</span><span>✕</span><span>□</span></div>
+  </div>
+
+  <div class="power-wrap">
+    <div class="ring"></div><div class="ring"></div>
+    <button class="power" id="power" aria-label="Encender la PS5">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>
+    </button>
+  </div>
+  <div id="msg" role="status"></div>
+
+  <div class="row">
+    <button class="sec" id="standby">Poner en reposo</button>
+  </div>
+
+  <section>
+    <h2>Tiempo encendida</h2>
+    <div class="time" id="played">0 h 0 min</div>
+    <p class="hint">Suma el tiempo que la consola está despierta mientras este servidor está activo.</p>
+  </section>
+
+  <section>
+    <h2>Apagado automático</h2>
+    <p class="hint" id="timerInfo">Elige cuánto falta para que la PS5 pase a reposo.</p>
+    <div class="chips" id="chips">
+      <button class="chip" data-m="30">30 min</button>
+      <button class="chip" data-m="60">1 h</button>
+      <button class="chip" data-m="90">1 h 30</button>
+      <button class="chip" data-m="120">2 h</button>
+      <button class="chip" data-m="0">Cancelar</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pendientes por jugar</h2>
+    <div class="add"><input id="newGame" placeholder="Añade un juego" maxlength="60"><button id="addBtn">Añadir</button></div>
+    <ul id="list"></ul>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const api = (p, m = 'GET', b) => fetch('/api/' + p, {
+  method: m, headers: {'Content-Type': 'application/json'}, body: b ? JSON.stringify(b) : undefined
+}).then(r => r.json());
+
+// Sonidos con Web Audio
+let ac;
+function tone(freqs, dur = .16) {
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    freqs.forEach((f, i) => {
+      const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + i * dur;
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(.16, t + .03);
+      g.gain.exponentialRampToValueAtTime(.001, t + dur * 2.4);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur * 2.6);
+    });
+  } catch {}
+}
+
+const LABELS = {
+  awake: 'Encendida', standby: 'En reposo', offline: 'No responde',
+  unknown: 'Estado desconocido'
+};
+let status = 'unknown', waiting = false, timerEnd = 0;
+
+function render() {
+  document.body.className = status + (waiting ? ' busy' : '');
+  $('label').textContent = waiting ? 'Despertando la consola…' : LABELS[status];
+  $('power').setAttribute('aria-label', status === 'awake' ? 'La PS5 ya está encendida' : 'Encender la PS5');
+}
+function fmt(s) { return Math.floor(s / 3600) + ' h ' + Math.floor(s % 3600 / 60) + ' min'; }
+function renderTimer() {
+  const left = timerEnd - Date.now();
+  $('timerInfo').textContent = left > 0
+    ? 'La PS5 pasará a reposo en ' + Math.ceil(left / 60000) + ' min.'
+    : 'Elige cuánto falta para que la PS5 pase a reposo.';
+}
+
+async function poll() {
+  try {
+    const s = await api('status');
+    const was = status;
+    status = s.status; timerEnd = s.timerEnd;
+    $('played').textContent = fmt(s.seconds);
+    if (waiting && status === 'awake') { waiting = false; tone([392, 523, 659, 784]); }
+    if (was === 'awake' && status === 'standby') tone([784, 523]);
+  } catch { status = 'offline'; }
+  render(); renderTimer();
+}
+setInterval(poll, 4000); setInterval(renderTimer, 15000); poll();
+
+$('power').onclick = async () => {
+  $('msg').textContent = '';
+  if (status === 'awake') { tone([523]); return; }
+  tone([440]); waiting = true; render();
+  const r = await api('wake', 'POST').catch(() => ({ok: false, detail: 'No llego al servidor del Mac.'}));
+  if (!r.ok) { waiting = false; $('msg').textContent = 'No se pudo encender. ' + (r.detail || ''); render(); return; }
+  setTimeout(() => { if (waiting) { waiting = false; $('msg').textContent = 'La consola no respondió a tiempo. Prueba otra vez.'; render(); } }, 45000);
+};
+
+$('standby').onclick = async () => {
+  tone([523]);
+  const r = await api('standby', 'POST').catch(() => ({ok: false}));
+  $('msg').textContent = r.ok ? '' : 'No se pudo poner en reposo. ' + (r.detail || '');
+  poll();
+};
+
+$('chips').onclick = async (e) => {
+  const m = e.target.dataset && e.target.dataset.m;
+  if (m === undefined) return;
+  tone([660]);
+  const s = await api('sleep-timer', 'POST', { minutes: +m });
+  timerEnd = s.timerEnd; renderTimer();
+};
+
+// Pendientes por jugar (se guardan en este iPhone)
+let games = [];
+try { games = JSON.parse(localStorage.getItem('ps5-games') || '[]'); } catch {}
+const save = () => { try { localStorage.setItem('ps5-games', JSON.stringify(games)); } catch {} };
+function drawList() {
+  const ul = $('list'); ul.innerHTML = '';
+  if (!games.length) { ul.innerHTML = '<li class="hint">Aún no hay juegos. Añade el primero.</li>'; return; }
+  games.forEach((g, i) => {
+    const li = document.createElement('li'); if (g.done) li.className = 'done';
+    const lab = document.createElement('label'), cb = document.createElement('input'), sp = document.createElement('span');
+    cb.type = 'checkbox'; cb.checked = g.done; sp.textContent = g.name;
+    cb.onchange = () => { g.done = cb.checked; save(); drawList(); if (g.done) tone([523, 659, 784]); };
+    lab.append(cb, sp);
+    const del = document.createElement('button'); del.textContent = '×'; del.setAttribute('aria-label', 'Quitar ' + g.name);
+    del.onclick = () => { games.splice(i, 1); save(); drawList(); };
+    li.append(lab, del); ul.append(li);
+  });
+}
+function addGame() {
+  const v = $('newGame').value.trim(); if (!v) return;
+  games.push({ name: v, done: false }); $('newGame').value = ''; save(); drawList();
+}
+$('addBtn').onclick = addGame;
+$('newGame').onkeydown = (e) => { if (e.key === 'Enter') addGame(); };
+drawList();
+</script>
+</body>
+</html>
