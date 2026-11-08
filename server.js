@@ -1,5 +1,5 @@
-// Servidor local para el mando PS5. Sin dependencias: solo Node + playactor.
-// Uso: node server.js   (opcional: PS5_IP=192.168.1.50 node server.js)
+// Local server for the PS5 remote. No dependencies: just Node + playactor.
+// Usage: node server.js   (optional: PS5_IP=192.168.1.50 node server.js)
 const http = require('http'), fs = require('fs'), path = require('path');
 const { execFile } = require('child_process');
 
@@ -73,4 +73,4 @@ http.createServer(async (req, res) => {
     return res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
   }
   send(res, { error: 'not found' }, 404);
-}).listen(PORT, '0.0.0.0', () => console.log('Mando PS5 listo en http://localhost:' + PORT));
+}).listen(PORT, '0.0.0.0', () => console.log('PS5 Remote ready at http://localhost:' + PORT));

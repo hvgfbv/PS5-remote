@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Mando PS5">
+<meta name="apple-mobile-web-app-title" content="PS5 Remote">
 <meta name="theme-color" content="#050d24">
-<title>Mando PS5</title>
+<title>PS5 Remote</title>
 <style>
 :root{
   --bg:#050d24; --panel:#0c1a40; --line:#1d3270; --ink:#e8f0ff; --dim:#8fa3d6;
@@ -82,45 +82,45 @@ li button{background:none;border:0;color:var(--dim);font-size:1.2rem;cursor:poin
 <main>
   <div class="state">
     <div>
-      <h1>Mando PS5</h1>
-      <p id="label">Buscando tu consola…</p>
+      <h1>PS5 Remote</h1>
+      <p id="label">Looking for your console…</p>
     </div>
     <div class="symbols" aria-hidden="true"><span>△</span><span>○</span><span>✕</span><span>□</span></div>
   </div>
 
   <div class="power-wrap">
     <div class="ring"></div><div class="ring"></div>
-    <button class="power" id="power" aria-label="Encender la PS5">
+    <button class="power" id="power" aria-label="Turn on the PS5">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>
     </button>
   </div>
   <div id="msg" role="status"></div>
 
   <div class="row">
-    <button class="sec" id="standby">Poner en reposo</button>
+    <button class="sec" id="standby">Put in rest mode</button>
   </div>
 
   <section>
-    <h2>Tiempo encendida</h2>
+    <h2>Time on</h2>
     <div class="time" id="played">0 h 0 min</div>
-    <p class="hint">Suma el tiempo que la consola está despierta mientras este servidor está activo.</p>
+    <p class="hint">Adds up the time the console is awake while this server is running.</p>
   </section>
 
   <section>
-    <h2>Apagado automático</h2>
-    <p class="hint" id="timerInfo">Elige cuánto falta para que la PS5 pase a reposo.</p>
+    <h2>Sleep timer</h2>
+    <p class="hint" id="timerInfo">Choose how long until the PS5 goes into rest mode.</p>
     <div class="chips" id="chips">
       <button class="chip" data-m="30">30 min</button>
       <button class="chip" data-m="60">1 h</button>
       <button class="chip" data-m="90">1 h 30</button>
       <button class="chip" data-m="120">2 h</button>
-      <button class="chip" data-m="0">Cancelar</button>
+      <button class="chip" data-m="0">Cancel</button>
     </div>
   </section>
 
   <section>
-    <h2>Pendientes por jugar</h2>
-    <div class="add"><input id="newGame" placeholder="Añade un juego" maxlength="60"><button id="addBtn">Añadir</button></div>
+    <h2>Play next</h2>
+    <div class="add"><input id="newGame" placeholder="Add a game" maxlength="60"><button id="addBtn">Add</button></div>
     <ul id="list"></ul>
   </section>
 </main>
@@ -131,7 +131,7 @@ const api = (p, m = 'GET', b) => fetch('/api/' + p, {
   method: m, headers: {'Content-Type': 'application/json'}, body: b ? JSON.stringify(b) : undefined
 }).then(r => r.json());
 
-// Sonidos con Web Audio
+// Sounds with Web Audio
 let ac;
 function tone(freqs, dur = .16) {
   try {
@@ -148,22 +148,22 @@ function tone(freqs, dur = .16) {
 }
 
 const LABELS = {
-  awake: 'Encendida', standby: 'En reposo', offline: 'No responde',
-  unknown: 'Estado desconocido'
+  awake: 'On', standby: 'Rest mode', offline: 'Not responding',
+  unknown: 'Status unknown'
 };
 let status = 'unknown', waiting = false, timerEnd = 0;
 
 function render() {
   document.body.className = status + (waiting ? ' busy' : '');
-  $('label').textContent = waiting ? 'Despertando la consola…' : LABELS[status];
-  $('power').setAttribute('aria-label', status === 'awake' ? 'La PS5 ya está encendida' : 'Encender la PS5');
+  $('label').textContent = waiting ? 'Waking the console…' : LABELS[status];
+  $('power').setAttribute('aria-label', status === 'awake' ? 'The PS5 is already on' : 'Turn on the PS5');
 }
 function fmt(s) { return Math.floor(s / 3600) + ' h ' + Math.floor(s % 3600 / 60) + ' min'; }
 function renderTimer() {
   const left = timerEnd - Date.now();
   $('timerInfo').textContent = left > 0
-    ? 'La PS5 pasará a reposo en ' + Math.ceil(left / 60000) + ' min.'
-    : 'Elige cuánto falta para que la PS5 pase a reposo.';
+    ? 'The PS5 will go into rest mode in ' + Math.ceil(left / 60000) + ' min.'
+    : 'Choose how long until the PS5 goes into rest mode.';
 }
 
 async function poll() {
@@ -183,15 +183,15 @@ $('power').onclick = async () => {
   $('msg').textContent = '';
   if (status === 'awake') { tone([523]); return; }
   tone([440]); waiting = true; render();
-  const r = await api('wake', 'POST').catch(() => ({ok: false, detail: 'No llego al servidor del Mac.'}));
-  if (!r.ok) { waiting = false; $('msg').textContent = 'No se pudo encender. ' + (r.detail || ''); render(); return; }
-  setTimeout(() => { if (waiting) { waiting = false; $('msg').textContent = 'La consola no respondió a tiempo. Prueba otra vez.'; render(); } }, 45000);
+  const r = await api('wake', 'POST').catch(() => ({ok: false, detail: 'Could not reach the server.'}));
+  if (!r.ok) { waiting = false; $('msg').textContent = 'Could not turn it on. ' + (r.detail || ''); render(); return; }
+  setTimeout(() => { if (waiting) { waiting = false; $('msg').textContent = 'The console did not respond in time. Try again.'; render(); } }, 45000);
 };
 
 $('standby').onclick = async () => {
   tone([523]);
   const r = await api('standby', 'POST').catch(() => ({ok: false}));
-  $('msg').textContent = r.ok ? '' : 'No se pudo poner en reposo. ' + (r.detail || '');
+  $('msg').textContent = r.ok ? '' : 'Could not put it in rest mode. ' + (r.detail || '');
   poll();
 };
 
@@ -203,20 +203,20 @@ $('chips').onclick = async (e) => {
   timerEnd = s.timerEnd; renderTimer();
 };
 
-// Pendientes por jugar (se guardan en este iPhone)
+// Play-next list (saved in this browser)
 let games = [];
 try { games = JSON.parse(localStorage.getItem('ps5-games') || '[]'); } catch {}
 const save = () => { try { localStorage.setItem('ps5-games', JSON.stringify(games)); } catch {} };
 function drawList() {
   const ul = $('list'); ul.innerHTML = '';
-  if (!games.length) { ul.innerHTML = '<li class="hint">Aún no hay juegos. Añade el primero.</li>'; return; }
+  if (!games.length) { ul.innerHTML = '<li class="hint">No games yet. Add the first one.</li>'; return; }
   games.forEach((g, i) => {
     const li = document.createElement('li'); if (g.done) li.className = 'done';
     const lab = document.createElement('label'), cb = document.createElement('input'), sp = document.createElement('span');
     cb.type = 'checkbox'; cb.checked = g.done; sp.textContent = g.name;
     cb.onchange = () => { g.done = cb.checked; save(); drawList(); if (g.done) tone([523, 659, 784]); };
     lab.append(cb, sp);
-    const del = document.createElement('button'); del.textContent = '×'; del.setAttribute('aria-label', 'Quitar ' + g.name);
+    const del = document.createElement('button'); del.textContent = '×'; del.setAttribute('aria-label', 'Remove ' + g.name);
     del.onclick = () => { games.splice(i, 1); save(); drawList(); };
     li.append(lab, del); ul.append(li);
   });
